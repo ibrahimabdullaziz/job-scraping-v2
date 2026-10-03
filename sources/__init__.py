@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from sources.wuzzuf import fetch_wuzzuf
 from sources.linkedin import fetch_linkedin
+from sources.remotive import fetch_remotive
 
 # ─── Active sources ───────────────────────────────────────────────────────────
 # To disable a source: comment it out or remove it.
@@ -17,4 +18,5 @@ from sources.linkedin import fetch_linkedin
 ALL_FETCHERS = [
     ("WUZZUF", fetch_wuzzuf),
     ("LinkedIn", fetch_linkedin),
+    ("Remotive", fetch_remotive),
 ]

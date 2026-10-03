@@ -155,3 +155,67 @@ class TestLinkedInParser:
         """
         jobs = li_parse_cards(closed_html)
         assert jobs == []
+
+
+# ─── Remotive fixtures ────────────────────────────────────────────────────────
+
+REMOTIVE_SAMPLE_JSON = {
+    "jobs": [
+        {
+            "id": 998877,
+            "url": "https://remotive.com/remote-jobs/software-development/full-stack-engineer-998877",
+            "title": "Full Stack Engineer",
+            "company_name": "Globex Remote",
+            "category": "Software Development",
+            "candidate_required_location": "Worldwide",
+            "job_type": "full_time",
+            "publication_date": "2026-10-01T12:00:00",
+            "tags": ["python", "react", "remote"],
+        },
+        {
+            "id": 887766,
+            "url": "https://remotive.com/remote-jobs/devops/senior-cloud-engineer-887766",
+            "title": "Senior Cloud Engineer",
+            "company_name": "Initech Cloud",
+            "category": "Devops",
+            "candidate_required_location": "EMEA",
+            "job_type": "full_time",
+            "publication_date": "2026-10-02T15:30:00",
+            "tags": ["aws", "kubernetes", "terraform"],
+        },
+    ]
+}
+
+
+class TestRemotiveParser:
+    def test_parses_job_titles_and_companies(self):
+        from sources.remotive import fetch_remotive
+        jobs = fetch_remotive(http_getter=lambda url: REMOTIVE_SAMPLE_JSON)
+        assert len(jobs) == 2
+        assert jobs[0].title == "Full Stack Engineer"
+        assert jobs[0].company == "Globex Remote"
+        assert jobs[1].title == "Senior Cloud Engineer"
+        assert jobs[1].company == "Initech Cloud"
+
+    def test_flags_remote_correctly(self):
+        from sources.remotive import fetch_remotive
+        jobs = fetch_remotive(http_getter=lambda url: REMOTIVE_SAMPLE_JSON)
+        for job in jobs:
+            assert job.is_remote is True
+            assert job.work_arrangement == "Remote"
+            assert job.source == "Remotive"
+
+    def test_extracts_location_and_id(self):
+        from sources.remotive import fetch_remotive
+        jobs = fetch_remotive(http_getter=lambda url: REMOTIVE_SAMPLE_JSON)
+        assert jobs[0].location == "Worldwide"
+        assert jobs[0].source_job_id == "998877"
+        assert jobs[1].location == "EMEA"
+        assert jobs[1].source_job_id == "887766"
+
+    def test_handles_empty_or_none_response(self):
+        from sources.remotive import fetch_remotive
+        assert fetch_remotive(http_getter=lambda url: None) == []
+        assert fetch_remotive(http_getter=lambda url: {}) == []
+        assert fetch_remotive(http_getter=lambda url: {"jobs": "not-a-list"}) == []
+

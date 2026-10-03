@@ -8,7 +8,7 @@ Covers Egypt, Saudi Arabia, the UAE, and Remote roles.
 
 ## Features
 
-- **Sources**: WUZZUF (primary Egypt/Gulf tech aggregator) and LinkedIn public guest search.
+- **Sources**: WUZZUF (primary Egypt/Gulf tech aggregator), LinkedIn public guest search, and Remotive (remote tech jobs API).
 - **Deduplication**: 3-tier SQLite deduplication to prevent reposting existing jobs.
 - **Topic Routing**: Sends jobs to specific forum topics based on role and location.
 - **Spam Filtering**: Automatically drops listings from unwanted agencies using `MUTED_COMPANIES`.
