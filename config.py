@@ -20,7 +20,7 @@ TELEGRAM_GROUP_ID: str = os.environ.get("TELEGRAM_GROUP_ID", "")
 
 # ─── Worker timing ───────────────────────────────────────────────────────────
 FETCH_INTERVAL_SECONDS: int = int(os.environ.get("FETCH_INTERVAL_SECONDS", "600"))  # 10 min
-TELEGRAM_SEND_DELAY: float = float(os.environ.get("TELEGRAM_SEND_DELAY", "1.5"))
+TELEGRAM_SEND_DELAY: float = float(os.environ.get("TELEGRAM_SEND_DELAY", "2.5"))
 
 # ─── Database path ───────────────────────────────────────────────────────────
 DB_PATH: str = os.environ.get("DB_PATH", "jobs.db")

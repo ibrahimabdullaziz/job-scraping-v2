@@ -34,10 +34,11 @@ def send_message(
     thread_id: Optional[int] = None,
     parse_mode: str = "HTML",
     disable_web_page_preview: bool = True,
+    max_retries: int = 3,
 ) -> bool:
     """
     Send a Telegram message.  Returns True on success, False on failure.
-    Logs failures with enough context to debug but does not raise.
+    Automatically respects Telegram rate limits (429 retry_after).
     """
     payload: dict = {
         "chat_id": chat_id,
@@ -48,21 +49,47 @@ def send_message(
     if thread_id is not None:
         payload["message_thread_id"] = thread_id
 
-    try:
-        resp = requests.post(_api_url("sendMessage"), json=payload, timeout=20)
-        data = resp.json()
-        if data.get("ok"):
-            return True
-        # Telegram-level errors (e.g. thread closed, bot not admin)
-        log.error(
-            "Telegram sendMessage error: %s (thread_id=%s)",
-            data.get("description", "unknown"),
-            thread_id,
-        )
-        return False
-    except requests.RequestException as exc:
-        log.error("Telegram request failed (thread_id=%s): %s", thread_id, exc)
-        return False
+    for attempt in range(max_retries):
+        try:
+            resp = requests.post(_api_url("sendMessage"), json=payload, timeout=20)
+            data = resp.json()
+            if data.get("ok"):
+                return True
+
+            error_code = data.get("error_code")
+            params = data.get("parameters", {})
+            retry_after = params.get("retry_after")
+            desc = data.get("description", "")
+
+            # Telegram 429 / Rate Limit check
+            if error_code == 429 or retry_after or "retry after" in desc.lower():
+                wait_sec = int(retry_after) if retry_after else 15
+                log.warning(
+                    "Telegram 429 Rate Limit (thread_id=%s) — sleeping %ds before retry (%d/%d)",
+                    thread_id,
+                    wait_sec + 1,
+                    attempt + 1,
+                    max_retries,
+                )
+                time.sleep(wait_sec + 1)
+                continue
+
+            # Permanent error (e.g. chat not found, bot kicked)
+            log.error(
+                "Telegram sendMessage error: %s (thread_id=%s)",
+                desc or "unknown",
+                thread_id,
+            )
+            return False
+
+        except requests.RequestException as exc:
+            log.error("Telegram request failed (thread_id=%s): %s", thread_id, exc)
+            if attempt < max_retries - 1:
+                time.sleep(3)
+                continue
+            return False
+
+    return False
 
 
 # ─── Card formatting ──────────────────────────────────────────────────────────
