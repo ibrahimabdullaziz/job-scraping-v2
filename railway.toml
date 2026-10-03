@@ -1,0 +1,19 @@
+# Railway deployment configuration
+
+# Build phase
+[build]
+builder = "NIXPACKS"
+
+# Start the worker process
+[deploy]
+startCommand = "python worker.py"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Health check — Railway polls this file every 30 seconds.
+# The worker writes /tmp/worker_healthy after each cycle.
+# You can also add a lightweight HTTP health check by running a tiny
+# sidecar (see README for the optional FastAPI approach).
+[deploy.healthcheck]
+type = "command"
+command = "test -f /tmp/worker_healthy && python -c \"import json,sys,time; d=json.load(open('/tmp/worker_healthy')); sys.exit(0 if d.get('ok') and (time.time()-time.mktime(__import__('datetime').datetime.fromisoformat(d['ts'].replace('Z','+'+'00:00')).timetuple())) < 1800 else 1)\""
