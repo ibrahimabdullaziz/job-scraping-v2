@@ -1,0 +1,9 @@
+# Set default behavior to automatically handle line endings
+* text=auto
+
+# Explicitly declare text files
+*.md text
+*.py text
+*.txt text
+*.toml text
+*.env.example text
