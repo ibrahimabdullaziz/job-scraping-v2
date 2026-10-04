@@ -164,17 +164,20 @@ ROLE_KEYWORDS: dict[str, list[str]] = {
         "frontend developer", "frontend engineer", "svelte", "html/css",
     ],
     "mobile": [
-        # Only explicit mobile/app role titles — do NOT include standalone tech
-        # words like 'flutter' or 'kotlin' that appear as skills in non-mobile jobs.
+        # RULE: every keyword MUST end with a role word (developer/engineer/app).
+        # Bare framework names (flutter, react native, xamarin) are intentionally
+        # excluded — they appear as skill tags on non-mobile SWE jobs and would
+        # cause false routing from the SWE topic into mobile.
         "mobile developer", "mobile engineer", "mobile application developer",
-        "ios developer", "ios engineer", "ios app",
-        "android developer", "android engineer", "android app",
+        "mobile application engineer",
+        "ios developer", "ios engineer", "ios app developer",
+        "android developer", "android engineer", "android app developer",
         "flutter developer", "flutter engineer",
-        "react native developer", "react native engineer", "react native",
+        "react native developer", "react native engineer",
         "swift developer", "swift engineer",
         "kotlin developer", "kotlin engineer",
         "mobile app developer", "mobile app engineer",
-        "xamarin",
+        "xamarin developer", "xamarin engineer",
     ],
     "qa": [
         "qa engineer", "qa analyst", "quality assurance", "quality engineer",
