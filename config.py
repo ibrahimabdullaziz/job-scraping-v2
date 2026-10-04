@@ -164,10 +164,17 @@ ROLE_KEYWORDS: dict[str, list[str]] = {
         "frontend developer", "frontend engineer", "svelte", "html/css",
     ],
     "mobile": [
-        "mobile developer", "mobile engineer", "ios developer", "ios engineer",
-        "android developer", "android engineer", "flutter developer",
-        "flutter engineer", "flutter", "react native", "swift developer",
-        "kotlin developer", "mobile app",
+        # Only explicit mobile/app role titles — do NOT include standalone tech
+        # words like 'flutter' or 'kotlin' that appear as skills in non-mobile jobs.
+        "mobile developer", "mobile engineer", "mobile application developer",
+        "ios developer", "ios engineer", "ios app",
+        "android developer", "android engineer", "android app",
+        "flutter developer", "flutter engineer",
+        "react native developer", "react native engineer", "react native",
+        "swift developer", "swift engineer",
+        "kotlin developer", "kotlin engineer",
+        "mobile app developer", "mobile app engineer",
+        "xamarin",
     ],
     "qa": [
         "qa engineer", "qa analyst", "quality assurance", "quality engineer",

@@ -48,7 +48,7 @@ _EXCLUDED_RE = re.compile(
 
 _ROLE_RES: dict[str, re.Pattern] = {
     role: re.compile(
-        "|".join(re.escape(kw) for kw in keywords),
+        "|".join(r"\b" + re.escape(kw) + r"\b" for kw in keywords),
         re.IGNORECASE,
     )
     for role, keywords in config.ROLE_KEYWORDS.items()
