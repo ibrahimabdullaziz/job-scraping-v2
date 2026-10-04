@@ -92,10 +92,10 @@ def classify_role(job: Job) -> list[str]:
     """
     Return a list of role topic keys that match this job.
 
-    A single job can match multiple roles (e.g. a 'Data Engineer (Backend)'
-    might match both 'swe' and 'data_ai').
+    Role classification evaluates title and tags only. Company name is excluded
+    to prevent false matches (e.g. 'Backend Developer' at 'Orange Mobile').
     """
-    searchable = f"{job.title} {job.company} {' '.join(str(t) for t in job.tags)}"
+    searchable = f"{job.title} {' '.join(str(t) for t in job.tags)}"
     matched = [
         role
         for role, pattern in _ROLE_RES.items()
