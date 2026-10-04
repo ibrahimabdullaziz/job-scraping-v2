@@ -95,9 +95,20 @@ class TestRemoteMatching:
 
 class TestRoleClassification:
     def test_swe_backend(self):
+        # 'backend' is a specific role — 'swe' must be suppressed to avoid spam.
         roles = job_filter.classify_role(make_job(title="Backend Developer"))
-        assert "swe" in roles
         assert "backend" in roles
+        assert "swe" not in roles, "swe must not duplicate a specific backend role"
+
+    def test_swe_suppressed_for_frontend(self):
+        roles = job_filter.classify_role(make_job(title="React Frontend Engineer"))
+        assert "frontend" in roles
+        assert "swe" not in roles, "swe must not duplicate a specific frontend role"
+
+    def test_swe_suppressed_for_mobile(self):
+        roles = job_filter.classify_role(make_job(title="Flutter Mobile Developer"))
+        assert "mobile" in roles
+        assert "swe" not in roles, "swe must not duplicate a specific mobile role"
 
     def test_frontend(self):
         roles = job_filter.classify_role(make_job(title="React Frontend Engineer"))
@@ -211,7 +222,8 @@ class TestRouting:
         job = make_job(title="Backend Developer", location="Cairo, Egypt")
         topics = job_filter.route_job(job)
         assert "egypt" in topics
-        assert "swe" in topics
+        assert "backend" in topics
+        assert "swe" not in topics  # swe is suppressed when a specific role matches
 
     def test_remote_gets_remote_topic(self):
         job = make_job(title="Software Engineer", location="Remote", is_remote=True)
@@ -242,7 +254,8 @@ class TestRouting:
         topics = job_filter.route_job(job)
         assert "egypt" in topics
         assert "remote" in topics
-        assert "swe" in topics
+        assert "backend" in topics
+        assert "swe" not in topics  # swe suppressed because backend matched
 
 
 # ─── URL normalisation / deduplication ───────────────────────────────────────

@@ -70,11 +70,29 @@ def is_uae(job: Job) -> bool:
 
 
 def is_remote(job: Job) -> bool:
-    """True when the listing is clearly remote (not just a location named 'Remote')."""
-    if job.is_remote:
-        return True
-    combined = f"{job.location} {job.work_arrangement} {' '.join(str(t) for t in job.tags)}"
-    return bool(_REMOTE_RE.search(combined))
+    """True when the listing is clearly remote and not restricted to a non-target region.
+
+    Remote jobs that explicitly restrict candidates to Americas/Europe/APAC
+    (with no Worldwide/MENA mention) are treated as non-remote for our purposes
+    so they don't slip through the geography gate.
+    """
+    if not (job.is_remote or bool(_REMOTE_RE.search(
+            f"{job.location} {job.work_arrangement} {' '.join(str(t) for t in job.tags)}"
+    ))):
+        return False
+
+    # --- Region gating for remote jobs ---
+    region_text = job.location.lower()
+    if region_text and region_text not in ("remote", "worldwide remote", ""):
+        allow = any(tok in region_text for tok in config.REMOTE_REGION_ALLOWLIST)
+        if allow:
+            return True
+        block = any(tok in region_text for tok in config.REMOTE_REGION_BLOCKLIST)
+        if block:
+            log.debug("DROP remote-region: %s @ %s — %s", job.title, job.company, job.location)
+            return False
+
+    return True
 
 
 def is_target_geography(job: Job) -> bool:
@@ -94,6 +112,9 @@ def classify_role(job: Job) -> list[str]:
 
     Role classification evaluates title and tags only. Company name is excluded
     to prevent false matches (e.g. 'Backend Developer' at 'Orange Mobile').
+
+    If a specific role topic (backend / frontend / mobile) matches, the generic
+    'swe' topic is suppressed to avoid cross-posting the same job everywhere.
     """
     searchable = f"{job.title} {' '.join(str(t) for t in job.tags)}"
     matched = [
@@ -101,6 +122,9 @@ def classify_role(job: Job) -> list[str]:
         for role, pattern in _ROLE_RES.items()
         if pattern.search(searchable)
     ]
+    # Suppress generic 'swe' when a specific role already covers this job.
+    if "swe" in matched and any(r in matched for r in config.SPECIFIC_ROLE_TOPICS):
+        matched = [r for r in matched if r != "swe"]
     return matched
 
 

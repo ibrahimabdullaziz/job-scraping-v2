@@ -112,17 +112,40 @@ REMOTE_MARKERS: tuple[str, ...] = (
     "عمل عن بُعد", "عمل من المنزل",
 )
 
+# Remote-job geography gating
+# If a remote job's candidate location contains ANY allowlist token, it passes.
+# If none of the allowlist tokens match AND at least one blocklist token matches,
+# the job is dropped (it targets a region we don't serve).
+REMOTE_REGION_ALLOWLIST: tuple[str, ...] = (
+    "worldwide", "anywhere", "global",
+    "egypt", "cairo", "mena", "middle east",
+    "saudi", "uae", "gulf", "africa",
+    "مصر", "الشرق الأوسط",
+)
+REMOTE_REGION_BLOCKLIST: tuple[str, ...] = (
+    "usa", "united states", "canada", "america", "latam", "latin america",
+    "europe", "uk", "united kingdom", "apac", "asia pacific",
+    "australia", "new zealand", "singapore", "japan", "south korea",
+    "northern america",
+)
+
 # ─── Role classification keywords ────────────────────────────────────────────
+# Topics that are considered "specific" — if a job matches any of these,
+# we do NOT also route it to the generic 'swe' topic to avoid spam.
+SPECIFIC_ROLE_TOPICS: frozenset[str] = frozenset({"backend", "frontend", "mobile"})
+
 ROLE_KEYWORDS: dict[str, list[str]] = {
     "swe": [
-        "software engineer", "software developer", "backend", "back-end",
-        "backend developer", "backend engineer", "frontend", "front-end",
-        "frontend developer", "full stack", "fullstack", "full-stack",
-        "mobile developer", "android developer", "ios developer",
-        "flutter developer", "react native", "web developer",
-        "java developer", "python developer", ".net developer",
-        "node developer", "django", "spring", "rails developer",
-        "golang", "rust developer", "embedded", "firmware",
+        # Generic software engineering titles only.
+        # Backend/frontend/mobile-specific keywords live in their own topics
+        # so we avoid double-posting the same job to multiple channels.
+        "software engineer", "software developer",
+        "full stack", "fullstack", "full-stack",
+        "web developer", "web engineer",
+        "java developer", "java engineer", "python developer",
+        ".net developer", "node developer",
+        "rails developer", "golang", "rust developer",
+        "embedded", "firmware",
     ],
     "backend": [
         "backend", "back-end", "python developer", "python engineer",

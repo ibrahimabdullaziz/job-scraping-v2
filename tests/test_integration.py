@@ -128,8 +128,9 @@ class TestRoutingIntegration:
     def test_egypt_swe_routes_to_swe_and_egypt(self):
         job = make_job(title="Backend Developer", location="Cairo, Egypt")
         topics = job_filter.route_job(job)
-        assert "swe" in topics
+        assert "backend" in topics
         assert "egypt" in topics
+        assert "swe" not in topics  # swe suppressed when specific role matches
 
     def test_remote_swe_routes_to_swe_and_remote(self):
         job = make_job(title="Software Engineer", location="Remote", is_remote=True)
